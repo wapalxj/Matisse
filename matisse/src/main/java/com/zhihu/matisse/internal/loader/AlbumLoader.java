@@ -24,6 +24,7 @@ import android.database.MergeCursor;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import androidx.loader.content.CursorLoader;
 
@@ -116,7 +117,22 @@ public class AlbumLoader extends CursorLoader {
     }
     // =============================================
 
-    private static final String BUCKET_ORDER_BY = "datetaken DESC";
+//    private static final String BUCKET_ORDER_BY = MediaStore.Images.Media.DATE_TAKEN +" DESC";
+//    private static final String BUCKET_ORDER_BY = MediaStore.Images.Media.DATE_MODIFIED +" DESC";
+    public static final String BUCKET_ORDER_BY =
+            "case ifnull(" + MediaStore.Images.Media.DATE_TAKEN + ",0)" +
+                    " when 0 then " + MediaStore.Images.Media.DATE_MODIFIED + "*1000" +
+                    " else " + MediaStore.Images.Media.DATE_TAKEN +
+                    " end" + " DESC , " + MediaStore.Images.ImageColumns._ID + " DESC";
+
+    public static final String BUCKET_ORDER_BY2 =
+            "case" +
+                    " when ifnull(" + MediaStore.Images.Media.DATE_TAKEN + ", 0) != 0 then " + MediaStore.Images.Media.DATE_TAKEN +
+                    " when ifnull(" + MediaStore.Images.Media.DATE_MODIFIED + ", 0) != 0 then " + MediaStore.Images.Media.DATE_MODIFIED + "*1000" +
+//                    " else " + MediaStore.Images.Media.DATE_ADDED + "*1000" +
+                    " when ifnull(" + MediaStore.Images.Media.DATE_ADDED + ", 0) != 0 then " + MediaStore.Images.Media.DATE_ADDED + "*1000" +
+                    " else " + MediaStore.Images.ImageColumns._ID +
+                    " end" + " DESC , " + MediaStore.Images.ImageColumns._ID + " DESC";
 
     private AlbumLoader(Context context, String selection, String[] selectionArgs) {
         super(
@@ -125,7 +141,7 @@ public class AlbumLoader extends CursorLoader {
                 beforeAndroidTen() ? PROJECTION : PROJECTION_29,
                 selection,
                 selectionArgs,
-                BUCKET_ORDER_BY
+                BUCKET_ORDER_BY2
         );
     }
 
@@ -158,6 +174,21 @@ public class AlbumLoader extends CursorLoader {
     public Cursor loadInBackground() {
         Cursor albums = super.loadInBackground();
         MatrixCursor allAlbum = new MatrixCursor(COLUMNS);
+        //查询所有的图片，下面逻辑处理成albums
+        int countF=0;
+//        while (albums.moveToNext()) {
+//            //查询数据
+//            countF++;
+//            if (countF<=4) {
+//                String imageName = albums.getString(albums.getColumnIndexOrThrow("_display_name"));
+//                String imagePath = albums.getString(albums.getColumnIndexOrThrow("_id"));
+//                String imageDateAdded = albums.getString(albums.getColumnIndexOrThrow("date_added"));
+//                Log.e("fire---AlbumLoader loadInBackground", "_display_name==" + imageName + ",_id===" + imagePath + ",imageDateAdded===" + imageDateAdded);
+//            }
+//        }
+//
+//        Log.e("fire---AlbumLoader loadInBackground", "count==" + countF);
+
 
         if (beforeAndroidTen()) {
             int totalCount = 0;

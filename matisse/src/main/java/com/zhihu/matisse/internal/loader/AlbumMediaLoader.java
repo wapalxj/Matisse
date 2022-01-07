@@ -120,11 +120,30 @@ public class AlbumMediaLoader extends CursorLoader {
     }
     // ===============================================================
 
-    private static final String ORDER_BY = MediaStore.Images.Media.DATE_TAKEN + " DESC";
+//    private static final String ORDER_BY = MediaStore.Images.Media.DATE_TAKEN + " DESC";
+
+    //    private static final String ORDER_BY = MediaStore.Images.Media.DATE_ADDED + " DESC";
+//    private static final String ORDER_BY = MediaStore.Images.Media.DATE_MODIFIED + " DESC";
+
+    public static final String ORDER_BY =
+            "case ifnull(" + MediaStore.Images.Media.DATE_TAKEN + ",0)" +
+                    " when 0 then " + MediaStore.Images.Media.DATE_MODIFIED + "*1000" +
+                    " else " + MediaStore.Images.Media.DATE_TAKEN +
+                    " end" + " DESC , " + MediaStore.Images.ImageColumns._ID + " DESC";
+
+    public static final String ORDER_BY2 =
+            "case" +
+                    " when ifnull(" + MediaStore.Images.Media.DATE_TAKEN + ", 0) != 0 then " + MediaStore.Images.Media.DATE_TAKEN +
+                    " when ifnull(" + MediaStore.Images.Media.DATE_MODIFIED + ", 0) != 0 then " + MediaStore.Images.Media.DATE_MODIFIED + "*1000" +
+//                    " else " + MediaStore.Images.Media.DATE_ADDED + "*1000" +
+                    " when ifnull(" + MediaStore.Images.Media.DATE_ADDED + ", 0) != 0 then " + MediaStore.Images.Media.DATE_ADDED + "*1000" +
+                    " else " + MediaStore.Images.ImageColumns._ID +
+                    " end" + " DESC , " + MediaStore.Images.ImageColumns._ID + " DESC";
+
     private final boolean mEnableCapture;
 
     private AlbumMediaLoader(Context context, String selection, String[] selectionArgs, boolean capture) {
-        super(context, QUERY_URI, PROJECTION, selection, selectionArgs, ORDER_BY);
+        super(context, QUERY_URI, PROJECTION, selection, selectionArgs, ORDER_BY2);
         mEnableCapture = capture;
     }
 

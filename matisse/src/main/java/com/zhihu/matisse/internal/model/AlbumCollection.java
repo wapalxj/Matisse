@@ -19,16 +19,24 @@ package com.zhihu.matisse.internal.model;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.util.Log;
+
 import androidx.fragment.app.FragmentActivity;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
 
 import com.zhihu.matisse.internal.loader.AlbumLoader;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 
 public class AlbumCollection implements LoaderManager.LoaderCallbacks<Cursor> {
-    private static final int LOADER_ID = 1;
+    private static final int LOADER_ID =0;
+
+
+
     private static final String STATE_CURRENT_SELECTION = "state_current_selection";
     private WeakReference<Context> mContext;
     private LoaderManager mLoaderManager;
@@ -53,6 +61,21 @@ public class AlbumCollection implements LoaderManager.LoaderCallbacks<Cursor> {
             return;
         }
 
+        if (data != null && !data.isAfterLast()) {
+            ArrayList<String> allImages = new ArrayList<>();
+            while (data.moveToNext()) {
+                //查询数据
+                String imageName = data.getString(data.getColumnIndexOrThrow("bucket_display_name"));
+                String imagePath = data.getString(data.getColumnIndexOrThrow("uri"));
+//                String imageName = data.getString(data.getColumnIndexOrThrow("_display_name"));
+//                String imagePath = data.getString(data.getColumnIndexOrThrow("_id"));
+                long count = data.getLong(data.getColumnIndex(AlbumLoader.COLUMN_COUNT));
+                allImages.add(imagePath);
+
+                Log.e("fire---AlbumCollection", "imageName==" + imageName + ",imagePath===" + imagePath+",count=="+count);
+
+            }
+        }
         if (!mLoadFinished) {
             mLoadFinished = true;
             mCallbacks.onAlbumLoad(data);
